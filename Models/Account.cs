@@ -19,6 +19,7 @@ namespace OnlineBankingAPI.Models
         public int? UserId { get; set; }
         public int? BankId { get; set; }
         public DateTime? CreatedAt { get; set; }
+        public int? Active { get; set; }
 
         public virtual Bank Bank { get; set; }
         public virtual User User { get; set; }

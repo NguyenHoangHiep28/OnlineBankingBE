@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnlineBankingAPI.Models.Requests;
+using OnlineBankingAPI.Models.Responses;
 using OnlineBankingAPI.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace OnlineBankingAPI.Controllers
@@ -19,16 +21,25 @@ namespace OnlineBankingAPI.Controllers
         {
             _userService = userService;
         }
-
-        [HttpPost("authenticate")]
-        public IActionResult Authenticate(AuthenticateRequest model)
+        public static bool IsPhoneNumber(string number)
         {
-            var response = _userService.Authenticate(model);
+            return Regex.Match(number, @"^?([0-9]{10})$").Success;
+        }
+        [HttpPost("authenticate")]
+        public AuthenticateResponse Authenticate(AuthenticateRequest model)
+        {
+            if (IsPhoneNumber(model.Phone))
+            {
+                var response = _userService.Authenticate(model);
+                if (response == null)
+                    return new AuthenticateResponse (new List<string> { "Incorrect phone number or password!" });
 
-            if (response == null)
-                return BadRequest(new { message = "Username or password is incorrect" });
-
-            return Ok(response);
+                return response;
+            }
+            else
+            {
+                return new AuthenticateResponse(new List<string> { "Invalid phone number!" });
+            }  
         }
 
         [Authorize]

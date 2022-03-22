@@ -23,7 +23,7 @@ namespace OnlineBankingAPI.Services
     public class UserService : IUserService
     {
         private readonly AppSettings _appSettings;
-        private readonly OnlineBankingContext bankingContext;
+        private OnlineBankingContext bankingContext;
         public UserService(IOptions<AppSettings> appSettings, OnlineBankingContext context)
         {
             _appSettings = appSettings.Value;
@@ -44,15 +44,41 @@ namespace OnlineBankingAPI.Services
 
         public AuthenticateResponse Authenticate(AuthenticateRequest model)
         {
-            var user = bankingContext.Users.SingleOrDefault(x => x.Phone == model.Phone && x.Password == MD5Hash(model.Password));
-
+            var user = bankingContext.Users.SingleOrDefault(x => x.Phone == model.Phone);
             // return null if user not found
             if (user == null) return null;
-
-            // authentication successful so generate jwt token
-            var token = generateJwtToken(user);
-
-            return new AuthenticateResponse(user, token);
+            if(user.Active == 1)
+            {
+                //check authenticate attemps for security lock
+                if (user.AuthAttempts < 3)
+                {
+                    if (user.Password != MD5Hash(model.Password))
+                    {
+                        user.AuthAttempts += 1;
+                        string attempsAlert = "";
+                        if (user.AuthAttempts < 3)
+                        {
+                            attempsAlert = $"{3 - user.AuthAttempts} attempts left before security account lock!";
+                        }
+                        else
+                        {
+                            attempsAlert = "Your account has been locked!";
+                            user.Active = 0;
+                        }
+                        bankingContext.SaveChanges();
+                        return new AuthenticateResponse(new List<string> { "Incorrect Password!", attempsAlert });
+                    }
+                }
+                // authentication successful so generate jwt token
+                var token = generateJwtToken(user);
+                user.AuthAttempts = 0;
+                bankingContext.SaveChanges();
+                return new AuthenticateResponse(user, token, bankingContext);
+            }
+            else
+            {
+                return new AuthenticateResponse(new List<string> { "This account has been locked!" });
+            }
         }
 
         public IEnumerable<User> GetAll()
