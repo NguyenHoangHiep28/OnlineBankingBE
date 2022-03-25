@@ -90,7 +90,7 @@ namespace OnlineBankingAPI.Services
                            {
                                AccountNumber = accs.AccountNumber,
                                Balance = accs.Balance,
-                               CreatedAt = accs.CreatedAt,
+                               CreatedAt = accs.CreatedAt.ToString("dd/MM/yyyy"),
                                Active = (int)accs.Active
                            }).ToList();
             if (accounts!= null)

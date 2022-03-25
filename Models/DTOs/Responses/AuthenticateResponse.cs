@@ -29,7 +29,7 @@ namespace OnlineBankingAPI.Models.Responses
                        {
                            AccountNumber = accs.AccountNumber,
                            Balance = accs.Balance,
-                           CreatedAt = accs.CreatedAt
+                           CreatedAt = accs.CreatedAt.ToString("MM/dd/yyyy")
                        }).ToList();
             Token = token;
         }

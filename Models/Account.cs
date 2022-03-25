@@ -15,11 +15,11 @@ namespace OnlineBankingAPI.Models
         }
 
         public string AccountNumber { get; set; }
-        public long? Balance { get; set; }
-        public int? UserId { get; set; }
-        public int? BankId { get; set; }
-        public DateTime? CreatedAt { get; set; }
-        public int? Active { get; set; }
+        public long Balance { get; set; }
+        public int UserId { get; set; }
+        public int BankId { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public int Active { get; set; }
 
         public virtual Bank Bank { get; set; }
         public virtual User User { get; set; }
