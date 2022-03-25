@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OnlineBankingAPI.Models;
+using OnlineBankingAPI.Models.DTOs;
 using OnlineBankingAPI.Models.Requests;
 using OnlineBankingAPI.Models.Responses;
 using OnlineBankingAPI.Services;
@@ -41,13 +43,17 @@ namespace OnlineBankingAPI.Controllers
                 return new AuthenticateResponse(new List<string> { "Invalid phone number!" });
             }  
         }
-
+        [Route("accounts")]
         [Authorize]
         [HttpGet]
-        public IActionResult GetAll()
+        public List<AccountDTO> GetAccounts(int userId)
         {
-            var users = _userService.GetAll();
-            return Ok(users);
+            var accountList = _userService.GetAccounts(userId);
+            if(accountList != null)
+            {
+                return accountList;
+            }
+            return null;
         }
     }
 }

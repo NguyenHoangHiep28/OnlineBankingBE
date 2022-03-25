@@ -9,7 +9,7 @@ namespace OnlineBankingAPI.Models.DTOs
     {
         public string AccountNumber { get; set; }
         public long? Balance { get; set; }
-
+        public int Active { get; set; }
         public DateTime? CreatedAt { get; set; }
     }
 }

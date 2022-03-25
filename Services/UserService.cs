@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OnlineBankingAPI.Models;
+using OnlineBankingAPI.Models.DTOs;
 using OnlineBankingAPI.Models.Requests;
 using OnlineBankingAPI.Models.Responses;
 using System;
@@ -17,8 +18,8 @@ namespace OnlineBankingAPI.Services
     public interface IUserService
     {
         AuthenticateResponse Authenticate(AuthenticateRequest model);
-        IEnumerable<User> GetAll();
         User GetById(int id);
+        List<AccountDTO> GetAccounts(int userId);
     }
     public class UserService : IUserService
     {
@@ -81,9 +82,22 @@ namespace OnlineBankingAPI.Services
             }
         }
 
-        public IEnumerable<User> GetAll()
+        public List<AccountDTO> GetAccounts(int userId)
         {
-            return bankingContext.Users.ToList();
+            var accounts = (from accs in bankingContext.Accounts
+                           where accs.UserId == userId
+                           select new AccountDTO
+                           {
+                               AccountNumber = accs.AccountNumber,
+                               Balance = accs.Balance,
+                               CreatedAt = accs.CreatedAt,
+                               Active = (int)accs.Active
+                           }).ToList();
+            if (accounts!= null)
+            {
+                return accounts;
+            }
+            return null;
         }
 
         public User GetById(int id)
@@ -101,7 +115,7 @@ namespace OnlineBankingAPI.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
-                Expires = DateTime.UtcNow.AddHours(1),
+                Expires = DateTime.Now.AddMinutes(30),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
