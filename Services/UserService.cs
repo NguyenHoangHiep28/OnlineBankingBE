@@ -84,17 +84,20 @@ namespace OnlineBankingAPI.Services
 
         public List<AccountDTO> GetAccounts(int userId)
         {
-            var accounts = (from accs in bankingContext.Accounts
-                           where accs.UserId == userId
-                           select new AccountDTO
-                           {
-                               AccountNumber = accs.AccountNumber,
-                               Balance = accs.Balance,
-                               CreatedAt = accs.CreatedAt.ToString("dd/MM/yyyy"),
-                               Active = (int)accs.Active
-                           }).ToList();
-            if (accounts!= null)
+            var user = bankingContext.Users.FirstOrDefault(x => x.Id == userId);
+            if (user != null)
             {
+                string userName = user.UserName;
+                var accounts = (from accs in bankingContext.Accounts
+                                where accs.UserId == userId
+                                select new AccountDTO
+                                {
+                                    AccountNumber = accs.AccountNumber,
+                                    Balance = accs.Balance,
+                                    CreatedAt = accs.CreatedAt.ToString("dd/MM/yyyy"),
+                                    Active = accs.Active,
+                                    UserName = userName
+                                }).ToList();
                 return accounts;
             }
             return null;

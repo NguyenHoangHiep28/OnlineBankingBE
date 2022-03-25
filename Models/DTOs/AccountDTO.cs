@@ -11,5 +11,6 @@ namespace OnlineBankingAPI.Models.DTOs
         public long Balance { get; set; }
         public int Active { get; set; }
         public string CreatedAt { get; set; }
+        public string UserName { get; set; }
     }
 }
