@@ -8,6 +8,7 @@ using OnlineBankingAPI.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -45,8 +46,8 @@ namespace OnlineBankingAPI.Controllers
         }
         [Route("accounts")]
         [Authorize]
-        [HttpGet]
-        public List<AccountDTO> GetAccounts(int userId)
+        [HttpPost]
+        public List<AccountDTO> GetAccounts(UserIdRequest userId)
         {
             var accountList = _userService.GetAccounts(userId);
             if(accountList != null)

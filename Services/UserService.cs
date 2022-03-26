@@ -19,7 +19,7 @@ namespace OnlineBankingAPI.Services
     {
         AuthenticateResponse Authenticate(AuthenticateRequest model);
         User GetById(int id);
-        List<AccountDTO> GetAccounts(int userId);
+        List<AccountDTO> GetAccounts(UserIdRequest userId);
     }
     public class UserService : IUserService
     {
@@ -82,14 +82,14 @@ namespace OnlineBankingAPI.Services
             }
         }
 
-        public List<AccountDTO> GetAccounts(int userId)
+        public List<AccountDTO> GetAccounts(UserIdRequest userId)
         {
-            var user = bankingContext.Users.FirstOrDefault(x => x.Id == userId);
+            var user = bankingContext.Users.FirstOrDefault(x => x.Id == userId.UserId);
             if (user != null)
             {
                 string userName = user.UserName;
                 var accounts = (from accs in bankingContext.Accounts
-                                where accs.UserId == userId
+                                where accs.UserId == userId.UserId
                                 select new AccountDTO
                                 {
                                     AccountNumber = accs.AccountNumber,
