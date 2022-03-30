@@ -20,12 +20,13 @@ namespace OnlineBankingAPI.Services
         AuthenticateResponse Authenticate(AuthenticateRequest model);
         User GetById(int id);
         List<AccountDTO> GetAccounts(UserIdRequest userId);
+        AccountDTO GetAccountById(AccountNumberRequest accountNumber);
     }
     public class UserService : IUserService
     {
         private readonly AppSettings _appSettings;
-        private OnlineBankingContext bankingContext;
-        public UserService(IOptions<AppSettings> appSettings, OnlineBankingContext context)
+        private OnlineBankingDBContext bankingContext;
+        public UserService(IOptions<AppSettings> appSettings, OnlineBankingDBContext context)
         {
             _appSettings = appSettings.Value;
             bankingContext = context;
@@ -80,6 +81,26 @@ namespace OnlineBankingAPI.Services
             {
                 return new AuthenticateResponse(new List<string> { "This account has been locked!" });
             }
+        }
+
+        public AccountDTO GetAccountById(AccountNumberRequest accountNumber)
+        {
+            Account account = bankingContext.Accounts.FirstOrDefault(a => a.AccountNumber == accountNumber.AccountNumber);
+            if(account != null)
+            {
+                User user = bankingContext.Users.FirstOrDefault(u => u.Id == account.UserId);
+                AccountDTO accountDTO = new()
+                {
+                    AccountNumber = account.AccountNumber,
+                    Balance = account.Balance,
+                    Active = account.Active,
+                    CreatedAt = account.CreatedAt.ToString("dd/MM/yyyy"),
+                    UserName = user.UserName
+                };
+                return accountDTO;
+            }
+            return null;
+
         }
 
         public List<AccountDTO> GetAccounts(UserIdRequest userId)

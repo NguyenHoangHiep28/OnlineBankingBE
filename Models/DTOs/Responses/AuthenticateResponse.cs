@@ -17,7 +17,7 @@ namespace OnlineBankingAPI.Models.Responses
 
         public List<string> Errors { get; set; }
 
-        public AuthenticateResponse(User user, string token, OnlineBankingContext db)
+        public AuthenticateResponse(User user, string token, OnlineBankingDBContext db)
         {
             Id = user.Id;
             UserName = user.UserName;

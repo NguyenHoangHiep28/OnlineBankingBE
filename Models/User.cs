@@ -18,8 +18,8 @@ namespace OnlineBankingAPI.Models
         public string Email { get; set; }
         public string Password { get; set; }
         public string Avatar { get; set; }
-        public int? Active { get; set; }
-        public int? AuthAttempts { get; set; }
+        public int Active { get; set; }
+        public int AuthAttempts { get; set; }
 
         public virtual ICollection<Account> Accounts { get; set; }
     }

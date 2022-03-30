@@ -13,12 +13,12 @@ namespace OnlineBankingAPI.Models
         }
 
         public string Id { get; set; }
-        public long? Amount { get; set; }
+        public long Amount { get; set; }
         public string Content { get; set; }
-        public int? Type { get; set; }
-        public long? ToCurrentBalance { get; set; }
+        public int Type { get; set; }
+        public long ToCurrentBalance { get; set; }
         public string FromAccountNumber { get; set; }
-        public long? FromCurrentBalance { get; set; }
+        public long FromCurrentBalance { get; set; }
         public string ToAccountNumber { get; set; }
 
         public virtual Account FromAccountNumberNavigation { get; set; }

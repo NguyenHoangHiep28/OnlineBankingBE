@@ -47,7 +47,7 @@ namespace OnlineBankingAPI.Controllers
         [Route("accounts")]
         [Authorize]
         [HttpPost]
-        public List<AccountDTO> GetAccounts(UserIdRequest userId)
+        public List<AccountDTO> GetAccountList(UserIdRequest userId)
         {
             var accountList = _userService.GetAccounts(userId);
             if(accountList != null)
@@ -56,5 +56,18 @@ namespace OnlineBankingAPI.Controllers
             }
             return null;
         }
+        [Route("myaccount")]
+        [Authorize]
+        [HttpPost]
+        public IActionResult GetAccount(AccountNumberRequest accountNumber)
+        {
+            var accountDTO = _userService.GetAccountById(accountNumber);
+            if (accountDTO != null)
+            {
+                return Ok(accountDTO);
+            }
+            return NotFound("Cannot found account with number : " + accountNumber.AccountNumber);
+        }
+
     }
 }

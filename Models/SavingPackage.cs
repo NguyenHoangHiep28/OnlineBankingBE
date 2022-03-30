@@ -13,9 +13,9 @@ namespace OnlineBankingAPI.Models
         }
 
         public int Id { get; set; }
-        public double? Interest { get; set; }
+        public double Interest { get; set; }
         public string PackageName { get; set; }
-        public int? Duration { get; set; }
+        public int Duration { get; set; }
 
         public virtual ICollection<SavingInfo> SavingInfos { get; set; }
     }
