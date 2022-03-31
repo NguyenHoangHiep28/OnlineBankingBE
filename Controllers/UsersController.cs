@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OnlineBankingAPI.Models;
 using OnlineBankingAPI.Models.DTOs;
+using OnlineBankingAPI.Models.DTOs.Requests;
 using OnlineBankingAPI.Models.Requests;
 using OnlineBankingAPI.Models.Responses;
 using OnlineBankingAPI.Services;
@@ -69,5 +70,17 @@ namespace OnlineBankingAPI.Controllers
             return NotFound("Cannot found account with number : " + accountNumber.AccountNumber);
         }
 
+        [Route("dashboard")]
+        [Authorize]
+        [HttpPost]
+        public IActionResult GetAccount(DashboardInfoRequest dashboardInfo)
+        {
+            var dashboardInfoRes = _userService.GetDashboardInfo(dashboardInfo);
+            if(dashboardInfoRes != null)
+            {
+                return Ok(dashboardInfoRes);
+            }
+            return BadRequest("Cannot found you account! Please contact us to have support.");
+        }
     }
 }

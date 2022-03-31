@@ -2,6 +2,8 @@
 using Microsoft.IdentityModel.Tokens;
 using OnlineBankingAPI.Models;
 using OnlineBankingAPI.Models.DTOs;
+using OnlineBankingAPI.Models.DTOs.Requests;
+using OnlineBankingAPI.Models.DTOs.Responses;
 using OnlineBankingAPI.Models.Requests;
 using OnlineBankingAPI.Models.Responses;
 using System;
@@ -21,6 +23,7 @@ namespace OnlineBankingAPI.Services
         User GetById(int id);
         List<AccountDTO> GetAccounts(UserIdRequest userId);
         AccountDTO GetAccountById(AccountNumberRequest accountNumber);
+        DashboardInfoResponse GetDashboardInfo(DashboardInfoRequest dashboardInfo);
     }
     public class UserService : IUserService
     {
@@ -49,7 +52,7 @@ namespace OnlineBankingAPI.Services
             var user = bankingContext.Users.SingleOrDefault(x => x.Phone == model.Phone);
             // return null if user not found
             if (user == null) return null;
-            if(user.Active == 1)
+            if (user.Active == 1)
             {
                 //check authenticate attemps for security lock
                 if (user.AuthAttempts < 3)
@@ -86,7 +89,7 @@ namespace OnlineBankingAPI.Services
         public AccountDTO GetAccountById(AccountNumberRequest accountNumber)
         {
             Account account = bankingContext.Accounts.FirstOrDefault(a => a.AccountNumber == accountNumber.AccountNumber);
-            if(account != null)
+            if (account != null)
             {
                 User user = bankingContext.Users.FirstOrDefault(u => u.Id == account.UserId);
                 AccountDTO accountDTO = new()
@@ -105,12 +108,17 @@ namespace OnlineBankingAPI.Services
 
         public List<AccountDTO> GetAccounts(UserIdRequest userId)
         {
-            var user = bankingContext.Users.FirstOrDefault(x => x.Id == userId.UserId);
+            var result = GetAccountDTOs(userId.UserId);
+            return result;
+        }
+        private List<AccountDTO> GetAccountDTOs(int userId)
+        {
+            var user = bankingContext.Users.FirstOrDefault(x => x.Id == userId);
             if (user != null)
             {
                 string userName = user.UserName;
                 var accounts = (from accs in bankingContext.Accounts
-                                where accs.UserId == userId.UserId
+                                where accs.UserId == userId
                                 select new AccountDTO
                                 {
                                     AccountNumber = accs.AccountNumber,
@@ -123,10 +131,39 @@ namespace OnlineBankingAPI.Services
             }
             return null;
         }
-
         public User GetById(int id)
         {
             return bankingContext.Users.FirstOrDefault(x => x.Id == id);
+        }
+
+        public DashboardInfoResponse GetDashboardInfo(DashboardInfoRequest dashboardInfo)
+        {
+            List<AccountDTO> accounts = GetAccountDTOs(dashboardInfo.UserId);
+            if (accounts != null)
+            {
+
+                string thisAccountNumber = "";
+                long totalBalance = 0, savingBalance = 0, thisBalance = 0;
+                foreach (var account in accounts)
+                {
+                    if (account.AccountNumber.Equals(dashboardInfo.AccountNumber))
+                    {
+                        thisAccountNumber = account.AccountNumber;
+                        thisBalance = account.Balance;
+                    }
+                    totalBalance += account.Balance;
+                }
+                DashboardInfoResponse response = new()
+                {
+                    TotalBalance = totalBalance,
+                    ThisBalance = thisBalance,
+                    SavingBalance = savingBalance,
+                    ThisAccountNumber = dashboardInfo.AccountNumber
+                };
+
+                return response;
+            }
+            return null;
         }
 
         // helper methods
