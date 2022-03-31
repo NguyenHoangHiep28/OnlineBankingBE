@@ -30,6 +30,11 @@ namespace OnlineBankingAPI.Controllers
                 // Add transfercommand to DB
                 Account fromAccount = GetAccount(transferRequest.FromAccountNumber);
                 Account toAccount = GetAccount(transferRequest.ToAccountNumber);
+
+                long trasactionFee = _onlineBankingDB.Banks.FirstOrDefault().TransactionFee;
+                long fromBalance = fromAccount.Balance - transferRequest.Amount - trasactionFee;
+                long toBalance = toAccount.Balance + transferRequest.Amount;
+
                 TransferCommand transferCommand = new()
                 {
                     Id = "MTBT00" + (_onlineBankingDB.TransferCommands.Count() + 1).ToString(),
@@ -38,8 +43,8 @@ namespace OnlineBankingAPI.Controllers
                     Type = transferRequest.Type,
                     FromAccountNumber = fromAccount.AccountNumber,
                     ToAccountNumber = toAccount.AccountNumber,
-                    ToCurrentBalance = toAccount.Balance,
-                    FromCurrentBalance = fromAccount.Balance
+                    ToCurrentBalance = toBalance,
+                    FromCurrentBalance = fromBalance
 
                 };
                 _onlineBankingDB.TransferCommands.Add(transferCommand);
@@ -52,8 +57,8 @@ namespace OnlineBankingAPI.Controllers
                     CreatedAt = DateTime.Now,
                     CommandId = transferCommand.Id
                 };
-                long trasactionFee = _onlineBankingDB.Banks.FirstOrDefault().TransactionFee;
-                fromAccount.Balance -= transferRequest.Amount + trasactionFee;
+                
+                fromAccount.Balance = fromBalance;
                 _onlineBankingDB.Transactions.Add(fromTransaction);
 
                 Transaction toTransaction = new()
@@ -63,7 +68,7 @@ namespace OnlineBankingAPI.Controllers
                     CreatedAt = DateTime.Now,
                     CommandId = transferCommand.Id
                 };
-                toAccount.Balance += transferRequest.Amount;
+                toAccount.Balance = toBalance;
                 _onlineBankingDB.Transactions.Add(toTransaction);
 
                 _onlineBankingDB.SaveChanges();
