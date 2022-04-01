@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OnlineBankingAPI.Models;
 using OnlineBankingAPI.Models.DTOs;
 using OnlineBankingAPI.Models.DTOs.Requests;
+using OnlineBankingAPI.Models.DTOs.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,7 +59,7 @@ namespace OnlineBankingAPI.Controllers
                     CreatedAt = DateTime.Now,
                     CommandId = transferCommand.Id
                 };
-                
+
                 fromAccount.Balance = fromBalance;
                 _onlineBankingDB.Transactions.Add(fromTransaction);
 
@@ -155,6 +157,60 @@ namespace OnlineBankingAPI.Controllers
             }
         }
 
+        [Route("transaction-history")]
+        [Authorize]
+        [HttpPost]
+        public IActionResult GetTransactionHistory(AccountNumberRequest accountNumber)
+        {
+            var transferCommands = _onlineBankingDB.TransferCommands.Where
+                (
+                    t => t.FromAccountNumber.Equals(accountNumber.AccountNumber) ||
+                    t.ToAccountNumber.Equals(accountNumber.AccountNumber)
+                ).Include(t => t.Transactions).ToList();
+            if (transferCommands.Count > 0)
+            {
+                List<TransactionHistory> transactionHistories = new List<TransactionHistory>();
+                long myCurrentBalance = 0;
+                string myAccountNumber = "", partnerAccountNumber = "", content = "";
+                long changeAmount = 0;
+                DateTime createdAt;
+                foreach (var tCommand in transferCommands)
+                {
+
+                    changeAmount = tCommand.Transactions.FirstOrDefault(t => t.AccountNumber.Equals(accountNumber.AccountNumber)).ChangedAmount;
+
+                    if (tCommand.FromAccountNumber.Equals(accountNumber.AccountNumber))
+                    {
+                        myAccountNumber = tCommand.FromAccountNumber;
+                        myCurrentBalance = tCommand.FromCurrentBalance;
+                        partnerAccountNumber = tCommand.ToAccountNumber;
+                    }
+                    else
+                    {
+                        myAccountNumber = tCommand.ToAccountNumber;
+                        myCurrentBalance = tCommand.ToCurrentBalance;
+                        partnerAccountNumber = tCommand.FromAccountNumber;
+                    }
+                    content = tCommand.Content;
+                    createdAt = tCommand.Transactions.FirstOrDefault(t => t.AccountNumber.Equals(accountNumber.AccountNumber)).CreatedAt;
+                    TransactionHistory history = new()
+                    {
+                        Id = tCommand.Id,
+                        ChangedAmount = changeAmount,
+                        Content = content,
+                        CreatedAt = createdAt,
+                        MyAccountNumber = myAccountNumber,
+                        MyCurrentBalance = myCurrentBalance,
+                        PartnerAccountNumber = partnerAccountNumber,
+                        Type = tCommand.Type
+
+                    };
+                    transactionHistories.Add(history);
+                }
+                return Ok(transactionHistories);
+            }
+            return BadRequest("Your account has no transactions yet");
+        }
         private string GenerateRandomOTP(AccountNumberRequest accountNumber)
 
         {
