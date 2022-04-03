@@ -10,6 +10,7 @@ namespace OnlineBankingAPI.Models.DTOs.Responses
         public string Id { get; set; }
         public string MyAccountNumber { get; set; }
         public string PartnerAccountNumber { get; set; }
+        public string PartnerName { get; set; }
         public int Type { get; set; }
         public string Content { get; set; }
         public long MyCurrentBalance { get; set; }

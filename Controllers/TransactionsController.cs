@@ -75,7 +75,12 @@ namespace OnlineBankingAPI.Controllers
 
                 _onlineBankingDB.SaveChanges();
 
-                return Ok("Transfer successfully!");
+                
+                return Ok( new TransferSuccessResponse()
+                {
+                     TransactionId = transferCommand.Id,
+                     TransferTime = fromTransaction.CreatedAt
+                });
             }
 
             return BadRequest("Request ERROR! Transaction Failed");
@@ -166,12 +171,12 @@ namespace OnlineBankingAPI.Controllers
                 (
                     t => t.FromAccountNumber.Equals(accountNumber.AccountNumber) ||
                     t.ToAccountNumber.Equals(accountNumber.AccountNumber)
-                ).Include(t => t.Transactions).ToList();
+                ).OrderByDescending(t => t.Id).Include(t => t.Transactions).ToList();
             if (transferCommands.Count > 0)
             {
                 List<TransactionHistory> transactionHistories = new List<TransactionHistory>();
                 long myCurrentBalance = 0;
-                string myAccountNumber = "", partnerAccountNumber = "", content = "";
+                string myAccountNumber = "", partnerAccountNumber = "", content = "", partnerName = "";
                 long changeAmount = 0;
                 DateTime createdAt;
                 foreach (var tCommand in transferCommands)
@@ -191,6 +196,7 @@ namespace OnlineBankingAPI.Controllers
                         myCurrentBalance = tCommand.ToCurrentBalance;
                         partnerAccountNumber = tCommand.FromAccountNumber;
                     }
+                    partnerName = _onlineBankingDB.Users.FirstOrDefault(u => u.Id == GetAccount(partnerAccountNumber).UserId).UserName;
                     content = tCommand.Content;
                     createdAt = tCommand.Transactions.FirstOrDefault(t => t.AccountNumber.Equals(accountNumber.AccountNumber)).CreatedAt;
                     TransactionHistory history = new()
@@ -202,8 +208,8 @@ namespace OnlineBankingAPI.Controllers
                         MyAccountNumber = myAccountNumber,
                         MyCurrentBalance = myCurrentBalance,
                         PartnerAccountNumber = partnerAccountNumber,
-                        Type = tCommand.Type
-
+                        Type = tCommand.Type,
+                        PartnerName = partnerName
                     };
                     transactionHistories.Add(history);
                 }
@@ -253,4 +259,6 @@ namespace OnlineBankingAPI.Controllers
         }
 
     }
+
+    internal record NewRecord();
 }
