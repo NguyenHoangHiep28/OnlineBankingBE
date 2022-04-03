@@ -167,11 +167,11 @@ namespace OnlineBankingAPI.Controllers
         [HttpPost]
         public IActionResult GetTransactionHistory(AccountNumberRequest accountNumber)
         {
-            var transferCommands = _onlineBankingDB.TransferCommands.Where
+            List<TransferCommand> transferCommands = _onlineBankingDB.TransferCommands.Where
                 (
                     t => t.FromAccountNumber.Equals(accountNumber.AccountNumber) ||
                     t.ToAccountNumber.Equals(accountNumber.AccountNumber)
-                ).OrderByDescending(t => t.Id).Include(t => t.Transactions).ToList();
+                ).Include(t => t.Transactions).ToList();
             if (transferCommands.Count > 0)
             {
                 List<TransactionHistory> transactionHistories = new List<TransactionHistory>();
@@ -213,7 +213,8 @@ namespace OnlineBankingAPI.Controllers
                     };
                     transactionHistories.Add(history);
                 }
-                return Ok(transactionHistories);
+                List<TransactionHistory> sortedHistories = transactionHistories.OrderByDescending(t => t.CreatedAt).ToList();
+                return Ok(sortedHistories);
             }
             return BadRequest("Your account has no transactions yet");
         }
