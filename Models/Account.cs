@@ -9,7 +9,6 @@ namespace OnlineBankingAPI.Models
     {
         public Account()
         {
-            Otps = new HashSet<Otp>();
             SavingInfos = new HashSet<SavingInfo>();
             TransferCommandFromAccountNumberNavigations = new HashSet<TransferCommand>();
             TransferCommandToAccountNumberNavigations = new HashSet<TransferCommand>();
@@ -25,7 +24,6 @@ namespace OnlineBankingAPI.Models
 
         public virtual Bank Bank { get; set; }
         public virtual User User { get; set; }
-        public virtual ICollection<Otp> Otps { get; set; }
         public virtual ICollection<SavingInfo> SavingInfos { get; set; }
         public virtual ICollection<TransferCommand> TransferCommandFromAccountNumberNavigations { get; set; }
         public virtual ICollection<TransferCommand> TransferCommandToAccountNumberNavigations { get; set; }

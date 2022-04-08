@@ -8,6 +8,10 @@ namespace OnlineBankingAPI.Models
 {
     public partial class OnlineBankingDBContext : DbContext
     {
+        public OnlineBankingDBContext()
+        {
+        }
+
         public OnlineBankingDBContext(DbContextOptions<OnlineBankingDBContext> options)
             : base(options)
         {
@@ -22,6 +26,7 @@ namespace OnlineBankingAPI.Models
         public virtual DbSet<Transaction> Transactions { get; set; }
         public virtual DbSet<TransferCommand> TransferCommands { get; set; }
         public virtual DbSet<User> Users { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -110,12 +115,6 @@ namespace OnlineBankingAPI.Models
                     .HasMaxLength(6)
                     .IsUnicode(false)
                     .HasColumnName("OTP");
-
-                entity.HasOne(d => d.AccountNumberNavigation)
-                    .WithMany(p => p.Otps)
-                    .HasForeignKey(d => d.AccountNumber)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__OTPs__AccountNum__32E0915F");
             });
 
             modelBuilder.Entity<SavingInfo>(entity =>
@@ -194,7 +193,7 @@ namespace OnlineBankingAPI.Models
                     .HasColumnName("ID");
 
                 entity.Property(e => e.Content)
-                    .HasMaxLength(1)
+                    .HasMaxLength(255)
                     .IsUnicode(false);
 
                 entity.Property(e => e.FromAccountNumber)

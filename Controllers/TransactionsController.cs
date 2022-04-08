@@ -75,11 +75,11 @@ namespace OnlineBankingAPI.Controllers
 
                 _onlineBankingDB.SaveChanges();
 
-                
-                return Ok( new TransferSuccessResponse()
+
+                return Ok(new TransferSuccessResponse()
                 {
-                     TransactionId = transferCommand.Id,
-                     TransferTime = fromTransaction.CreatedAt
+                    TransactionId = transferCommand.Id,
+                    TransferTime = fromTransaction.CreatedAt
                 });
             }
 
@@ -87,52 +87,44 @@ namespace OnlineBankingAPI.Controllers
         }
 
         [Route("transaction-otp")]
-        [Authorize]
         [HttpPost]
-        public IActionResult GetOTP(AccountNumberRequest accountNumber /*, string phoneNumber */)
+        public IActionResult GetOTP(OTPSendRequest request)
         {
             // generate OTP
-            string myOTP = GenerateRandomOTP(accountNumber);
-            var account = GetAccount(accountNumber.AccountNumber);
-            if (account != null)
-            {
-                // Check if there existing an OTP of account then remove
-                var OTP = _onlineBankingDB.Otps.FirstOrDefault(o => o.AccountNumber == account.AccountNumber);
-                if (OTP != null)
-                {
-                    _onlineBankingDB.Remove(OTP);
-                    _onlineBankingDB.SaveChanges();
-                }
-                // Create & save a new OTP
-                var time = DateTime.Now;
-                var otp = new Otp()
-                {
-                    Otp1 = myOTP,
-                    AccountNumber = account.AccountNumber,
-                    CreatedAt = time,
-                    ExpiredAt = time.AddMinutes(5)
-                };
-                _onlineBankingDB.Otps.Add(otp);
-                _onlineBankingDB.SaveChanges();
-                // Send OTP to Phone
-                var success = SendOTP(myOTP);
-                if (success.ToString().Equals("queued"))
-                {
+            string myOTP = GenerateRandomOTP(request.AccountNumber);
 
-                    return Ok("OTP has been send to your phone!");
-                }
-                else
-                {
-                    return BadRequest("Cannot send OTP ...");
-                }
+            // Check if there existing an OTP of account then remove
+            var OTP = _onlineBankingDB.Otps.FirstOrDefault(o => o.AccountNumber == request.AccountNumber);
+            if (OTP != null)
+            {
+                _onlineBankingDB.Remove(OTP);
+                _onlineBankingDB.SaveChanges();
+            }
+            // Create & save a new OTP
+            var time = DateTime.Now;
+            var otp = new Otp()
+            {
+                Otp1 = myOTP,
+                AccountNumber = request.AccountNumber,
+                CreatedAt = time,
+                ExpiredAt = time.AddMinutes(5)
+            };
+            _onlineBankingDB.Otps.Add(otp);
+            _onlineBankingDB.SaveChanges();
+            // Send OTP to Phone
+            var success = SendOTP(myOTP, request.PhoneNumber);
+            if (success.ToString().Equals("queued"))
+            {
+
+                return Ok("OTP has been send to your phone!");
             }
             else
             {
-                return NotFound("Not Found Account Number for executing transfer");
+                return BadRequest("Cannot send OTP ...");
             }
+
         }
         [Route("totp-verify")]
-        [Authorize]
         [HttpPost]
         public IActionResult VerifyOTP(OTPVerificationRequest oTPVerification)
         {
@@ -218,12 +210,12 @@ namespace OnlineBankingAPI.Controllers
             }
             return BadRequest("Your account has no transactions yet");
         }
-        private string GenerateRandomOTP(AccountNumberRequest accountNumber)
+        private string GenerateRandomOTP(string accountNumber)
 
         {
 
             string sOTP = String.Empty;
-            char[] saAllowedCharacters = accountNumber.AccountNumber.ToCharArray();
+            char[] saAllowedCharacters = accountNumber.ToCharArray();
             Random rand = new Random();
 
             for (int i = 0; i < 6; i++)
@@ -237,17 +229,21 @@ namespace OnlineBankingAPI.Controllers
             return sOTP;
         }
 
-        private MessageResource.StatusEnum SendOTP(string sOTP /*, string phoneNumber */)
+        private MessageResource.StatusEnum SendOTP(string sOTP, string phoneNumber)
         {
             string accountSid = "ACc619004490dbd4138e1b385e9b256972";
-            string authToken = "8b28e8cb9354a1f235031bc26622452d";
-            string myVerificationPhone = "+84348483145";
+            string authToken = "3c736c9a89fc77017babb9a757db5a55";
+            string verificationPhone;
+            string vietnamCode = "+84";
+            phoneNumber.Remove(0);
+            // Format phone number to +84xxxxxxxxx
+            verificationPhone = vietnamCode + phoneNumber;
             TwilioClient.Init(accountSid, authToken);
 
             var message = MessageResource.Create(
-                body: "MTBANK : Your transfer verification is : " + sOTP,
+                body: "MTBANK : Your transfer verification OTP is : " + sOTP,
                 from: new Twilio.Types.PhoneNumber("+16099973225"),
-                to: new Twilio.Types.PhoneNumber(myVerificationPhone)
+                to: new Twilio.Types.PhoneNumber(verificationPhone)
             );
 
             return message.Status;
@@ -261,5 +257,4 @@ namespace OnlineBankingAPI.Controllers
 
     }
 
-    internal record NewRecord();
 }
