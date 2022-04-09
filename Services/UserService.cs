@@ -24,6 +24,7 @@ namespace OnlineBankingAPI.Services
         List<AccountDTO> GetAccounts(UserIdRequest userId);
         AccountDTO GetAccountById(AccountNumberRequest accountNumber);
         DashboardInfoResponse GetDashboardInfo(DashboardInfoRequest dashboardInfo);
+        bool LockAccount(string accountNumber);
     }
     public class UserService : IUserService
     {
@@ -165,7 +166,21 @@ namespace OnlineBankingAPI.Services
             }
             return null;
         }
-
+        public bool LockAccount(string accountNumber)
+        {
+            bool isLocked = false;
+            var account = bankingContext.Accounts.FirstOrDefault(a => a.AccountNumber.Equals(accountNumber));
+            if(account != null)
+            {
+                if(account.Active == 1)
+                {
+                    account.Active = 0;
+                    bankingContext.SaveChanges();
+                    isLocked = true;
+                }
+            }
+            return isLocked;
+        }
         // helper methods
 
         private string generateJwtToken(User user)

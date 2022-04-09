@@ -27,6 +27,7 @@ namespace OnlineBankingAPI.Models.Responses
                        where accs.UserId == user.Id
                        select new AccountDTO 
                        {
+                           Active = accs.Active,
                            AccountNumber = accs.AccountNumber,
                            Balance = accs.Balance,
                            CreatedAt = accs.CreatedAt.ToString("MM/dd/yyyy")

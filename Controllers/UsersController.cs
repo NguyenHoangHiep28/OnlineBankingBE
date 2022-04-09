@@ -82,7 +82,19 @@ namespace OnlineBankingAPI.Controllers
             }
             return BadRequest("Cannot found you account! Please contact us to have support.");
         }
-
-
+        [Route("lock-account")]
+        [Authorize]
+        [HttpPost]
+        public IActionResult LockAccount(AccountNumberRequest accNumberRequest)
+        {
+            bool accountLockSuccess = _userService.LockAccount(accNumberRequest.AccountNumber);
+            if(accountLockSuccess)
+            {
+                return Ok(new { message = $"Account {accNumberRequest.AccountNumber} locked successfully!" });
+            }else
+            {
+                return NotFound(new { message = $"Cannot found available account for locking. Please contact us to get futher support!" });
+            }
+        }
     }
 }
