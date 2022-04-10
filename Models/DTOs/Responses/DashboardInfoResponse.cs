@@ -10,6 +10,7 @@ namespace OnlineBankingAPI.Models.DTOs.Responses
         public long TotalBalance { get; set; }
         public long ThisBalance { get; set; }
         public string ThisAccountNumber { get; set; }
-        public long SavingBalance { get; set; }
+        public long SavingTotalBalance { get; set; }
+        public int SavingBooksCount { get; set; }
     }
 }

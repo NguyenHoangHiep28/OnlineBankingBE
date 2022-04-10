@@ -13,6 +13,7 @@ namespace OnlineBankingAPI.Models
         public string SavingId { get; set; }
         public string AccountNumber { get; set; }
         public int PackageId { get; set; }
+        public long Amount { get; set; }
 
         public virtual Account AccountNumberNavigation { get; set; }
         public virtual SavingPackage Package { get; set; }

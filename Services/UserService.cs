@@ -25,6 +25,7 @@ namespace OnlineBankingAPI.Services
         AccountDTO GetAccountById(AccountNumberRequest accountNumber);
         DashboardInfoResponse GetDashboardInfo(DashboardInfoRequest dashboardInfo);
         bool LockAccount(string accountNumber);
+        bool UnlockAccount(string accountNumber);
     }
     public class UserService : IUserService
     {
@@ -140,11 +141,20 @@ namespace OnlineBankingAPI.Services
         public DashboardInfoResponse GetDashboardInfo(DashboardInfoRequest dashboardInfo)
         {
             List<AccountDTO> accounts = GetAccountDTOs(dashboardInfo.UserId);
+            List<SavingInfo> savingBooks = bankingContext.SavingInfos.Where(s => s.AccountNumber == dashboardInfo.AccountNumber).ToList();
             if (accounts != null)
             {
-
                 string thisAccountNumber = "";
-                long totalBalance = 0, savingBalance = 0, thisBalance = 0;
+                int savingBooksCount = savingBooks.Count;
+                long totalBalance = 0, thisBalance = 0;
+                long savingTotalBalance = 0;
+                if (savingBooksCount > 0)
+                {
+                    foreach (SavingInfo saving in savingBooks)
+                    {
+                        savingTotalBalance += saving.Amount;
+                    }
+                }
                 foreach (var account in accounts)
                 {
                     if (account.AccountNumber.Equals(dashboardInfo.AccountNumber))
@@ -158,8 +168,9 @@ namespace OnlineBankingAPI.Services
                 {
                     TotalBalance = totalBalance,
                     ThisBalance = thisBalance,
-                    SavingBalance = savingBalance,
-                    ThisAccountNumber = dashboardInfo.AccountNumber
+                    SavingTotalBalance = savingTotalBalance,
+                    ThisAccountNumber = dashboardInfo.AccountNumber,
+                    SavingBooksCount = savingBooksCount
                 };
 
                 return response;
@@ -170,9 +181,9 @@ namespace OnlineBankingAPI.Services
         {
             bool isLocked = false;
             var account = bankingContext.Accounts.FirstOrDefault(a => a.AccountNumber.Equals(accountNumber));
-            if(account != null)
+            if (account != null)
             {
-                if(account.Active == 1)
+                if (account.Active == 1)
                 {
                     account.Active = 0;
                     bankingContext.SaveChanges();
@@ -180,6 +191,21 @@ namespace OnlineBankingAPI.Services
                 }
             }
             return isLocked;
+        }
+        public bool UnlockAccount(string accountNumber)
+        {
+            bool isUnlocked = false;
+            var account = bankingContext.Accounts.FirstOrDefault(a => a.AccountNumber.Equals(accountNumber));
+            if (account != null)
+            {
+                if (account.Active == 0)
+                {
+                    account.Active = 1;
+                    bankingContext.SaveChanges();
+                    isUnlocked = true;
+                }
+            }
+            return isUnlocked;
         }
         // helper methods
 

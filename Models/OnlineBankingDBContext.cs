@@ -19,14 +19,12 @@ namespace OnlineBankingAPI.Models
 
         public virtual DbSet<Account> Accounts { get; set; }
         public virtual DbSet<Bank> Banks { get; set; }
-        public virtual DbSet<Guideline> Guidelines { get; set; }
         public virtual DbSet<Otp> Otps { get; set; }
         public virtual DbSet<SavingInfo> SavingInfos { get; set; }
         public virtual DbSet<SavingPackage> SavingPackages { get; set; }
         public virtual DbSet<Transaction> Transactions { get; set; }
         public virtual DbSet<TransferCommand> TransferCommands { get; set; }
         public virtual DbSet<User> Users { get; set; }
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -78,20 +76,6 @@ namespace OnlineBankingAPI.Models
                 entity.Property(e => e.Logo)
                     .IsRequired()
                     .HasMaxLength(250)
-                    .IsUnicode(false);
-            });
-
-            modelBuilder.Entity<Guideline>(entity =>
-            {
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Content)
-                    .IsRequired()
-                    .HasColumnType("text");
-
-                entity.Property(e => e.Title)
-                    .IsRequired()
-                    .HasMaxLength(1)
                     .IsUnicode(false);
             });
 

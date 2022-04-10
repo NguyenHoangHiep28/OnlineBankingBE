@@ -96,5 +96,20 @@ namespace OnlineBankingAPI.Controllers
                 return NotFound(new { message = $"Cannot found available account for locking. Please contact us to get futher support!" });
             }
         }
+        [Route("unlock-account")]
+        [Authorize]
+        [HttpPost]
+        public IActionResult UnlockAccount(AccountNumberRequest accNumberRequest)
+        {
+            bool accountUnlockSuccess = _userService.UnlockAccount(accNumberRequest.AccountNumber);
+            if (accountUnlockSuccess)
+            {
+                return Ok(new { message = $"Account {accNumberRequest.AccountNumber} unlocked successfully!" });
+            }
+            else
+            {
+                return NotFound(new { message = $"Cannot found available account for unlocking. Please contact us to get futher support!" });
+            }
+        }
     }
 }
