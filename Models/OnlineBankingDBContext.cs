@@ -8,10 +8,6 @@ namespace OnlineBankingAPI.Models
 {
     public partial class OnlineBankingDBContext : DbContext
     {
-        public OnlineBankingDBContext()
-        {
-        }
-
         public OnlineBankingDBContext(DbContextOptions<OnlineBankingDBContext> options)
             : base(options)
         {

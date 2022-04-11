@@ -78,6 +78,18 @@ namespace OnlineBankingAPI.Controllers
 
                 _onlineBankingDB.SaveChanges();
 
+                // Send notification message to receiver phone
+                User receiver = GetUser(toAccount);
+                _OTPService.SendReceivedTransferMessageNotification
+                    (   
+                        toTransaction.CreatedAt,
+                        receiver.Phone,
+                        toAccount.AccountNumber,
+                        fromAccount.AccountNumber,
+                        transferRequest.Amount,
+                        toBalance,
+                        transferCommand.Content
+                    );
 
                 return Ok(new TransferSuccessResponse()
                 {
@@ -121,11 +133,10 @@ namespace OnlineBankingAPI.Controllers
                 string myAccountNumber = "", partnerAccountNumber = "", content = "", partnerName = "";
                 long changeAmount = 0;
                 DateTime createdAt;
+                TransactionHistory history;
                 foreach (var tCommand in transferCommands)
                 {
-
                     changeAmount = tCommand.Transactions.FirstOrDefault(t => t.AccountNumber.Equals(accountNumber.AccountNumber)).ChangedAmount;
-
                     if (tCommand.FromAccountNumber.Equals(accountNumber.AccountNumber))
                     {
                         myAccountNumber = tCommand.FromAccountNumber;
@@ -138,10 +149,17 @@ namespace OnlineBankingAPI.Controllers
                         myCurrentBalance = tCommand.ToCurrentBalance;
                         partnerAccountNumber = tCommand.FromAccountNumber;
                     }
-                    partnerName = _onlineBankingDB.Users.FirstOrDefault(u => u.Id == GetAccount(partnerAccountNumber).UserId).UserName;
                     content = tCommand.Content;
                     createdAt = tCommand.Transactions.FirstOrDefault(t => t.AccountNumber.Equals(accountNumber.AccountNumber)).CreatedAt;
-                    TransactionHistory history = new()
+                    if (tCommand.Type == 1)
+                    {
+                        partnerName = _onlineBankingDB.Users.FirstOrDefault(u => u.Id == GetAccount(partnerAccountNumber).UserId).UserName;
+                    }
+                    else if (tCommand.Type == 2)
+                    {
+                        partnerName = GetUser(GetAccount(accountNumber.AccountNumber)).UserName;
+                    }
+                    history = new()
                     {
                         Id = tCommand.Id,
                         ChangedAmount = changeAmount,
@@ -164,6 +182,12 @@ namespace OnlineBankingAPI.Controllers
         {
             var account = _onlineBankingDB.Accounts.FirstOrDefault(acc => acc.AccountNumber == accountNumber);
             return account;
+        }
+
+        private User GetUser(Account account)
+        {
+            var user = _onlineBankingDB.Users.FirstOrDefault(u => u.Id == account.UserId);
+            return user;
         }
 
     }

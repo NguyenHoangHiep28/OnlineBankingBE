@@ -16,14 +16,31 @@ namespace OnlineBankingAPI.Services
         string GenerateRandomOTP(string accountNumber);
         IActionResult VerifyOTP(OTPVerificationRequest oTPVerification);
         IActionResult GetOTP(OTPSendRequest request);
+        void SendReceivedTransferMessageNotification
+            (
+                DateTime receivedtime,
+                string phoneNumber,
+                string toAccount,
+                string fromAccountNumber,
+                long amount,
+                long finalBalance,
+                string content
+            );
     }
-    public class OTPService : ControllerBase,IOTPService
+    public class OTPService : ControllerBase, IOTPService
     {
         private OnlineBankingDBContext bankingContext;
+        private string accountSid = "ACc619004490dbd4138e1b385e9b256972";
+        private string authToken = "3c736c9a89fc77017babb9a757db5a55";
         public OTPService(OnlineBankingDBContext onlineBankingDB)
         {
             bankingContext = onlineBankingDB;
         }
+
+        public OTPService()
+        {
+        }
+
         public IActionResult VerifyOTP(OTPVerificationRequest oTPVerification)
         {
             var myOTP = bankingContext.Otps.FirstOrDefault(o => o.AccountNumber == oTPVerification.AccountNumber);
@@ -71,9 +88,6 @@ namespace OnlineBankingAPI.Services
         }
         public MessageResource.StatusEnum SendOTP(string sOTP, string phoneNumber)
         {
-            string accountSid = "ACc619004490dbd4138e1b385e9b256972";
-            string authToken = "607cf2d95b9627bcbeb97347dee264a6";
-            //3c736c9a89fc77017babb9a757db5a55
             string verificationPhone;
             string vietnamCode = "+84";
             phoneNumber.Remove(0);
@@ -124,6 +138,29 @@ namespace OnlineBankingAPI.Services
                 return BadRequest("Cannot send OTP ...");
             }
 
+        }
+
+        public void SendReceivedTransferMessageNotification(
+            DateTime receivedtime,
+            string phoneNumber,
+            string toAccount,
+            string fromAccountNumber,
+            long amount,
+            long finalBalance,
+            string content
+        )
+        {
+            string verificationPhone;
+            string vietnamCode = "+84";
+            phoneNumber.Remove(0);
+            verificationPhone = vietnamCode + phoneNumber;
+            TwilioClient.Init(accountSid, authToken);
+
+            var message = MessageResource.Create(
+                body: $"MTBANK : {receivedtime:MM/dd/yyyy HH:mm:ss}/Your account {toAccount}/+ {amount} VND from account number : {fromAccountNumber}/Content: {content}/Final balance : {finalBalance} VND",
+                from: new Twilio.Types.PhoneNumber("+16099973225"),
+                to: new Twilio.Types.PhoneNumber(verificationPhone)
+            );
         }
     }
 }
