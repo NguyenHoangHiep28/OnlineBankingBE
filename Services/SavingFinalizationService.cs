@@ -23,7 +23,7 @@ namespace OnlineBankingAPI.Services
         public void FinalizeSaving()
         {
             int hour = 0;
-            int minute = 50;
+            int minute = 5;
             if (DateTime.Now.Hour == hour)
             {
                 if (DateTime.Now.Minute - minute <= 0)
