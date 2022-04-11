@@ -37,6 +37,7 @@ namespace OnlineBankingAPI
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IOTPService, OTPService>();
             //services.AddTransient<IUserService, UserService>();
             services.AddDbContext<OnlineBankingDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("OnlineBankingDB")));
