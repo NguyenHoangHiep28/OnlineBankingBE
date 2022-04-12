@@ -108,6 +108,25 @@ namespace OnlineBankingAPI.Controllers
             }
             return NotFound(new { message = $"Not Found any savings from account {accountNumber} "});
         }
+        [Route("saving-packages")]
+ 
+        [HttpGet]
+        public IActionResult GetSavingPackages()
+        {
+            var packages = _onlineBankingDB.SavingPackages.ToList();
+            List<SavingPackageDTO> result = new();
+            foreach(SavingPackage package in packages)
+            {
+                result.Add(new SavingPackageDTO
+                {
+                    Id = package.Id,
+                    Duration = package.Duration,
+                    Interest = package.Interest,
+                    PackageName = package.PackageName
+                });
+            }
+            return Ok(result);
+        }
         private Account GetAccount(string accountNumber)
         {
             var account = _onlineBankingDB.Accounts.FirstOrDefault(acc => acc.AccountNumber == accountNumber);
