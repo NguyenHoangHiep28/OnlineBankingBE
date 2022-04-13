@@ -34,9 +34,7 @@ namespace OnlineBankingAPI.Controllers
                 long souceBalance = sourceAccount.Balance - request.Amount - trasactionFee;
                 SavingPackage package = GetSavingPackage(request.PackageId);
                 DateTime startDate = DateTime.Now.AddDays(1).Date;
-                // Get saving books count for generate new saving Id
-                int savingCount = _onlineBankingDB.SavingInfos.Where(s => s.AccountNumber.Equals(sourceAccount.AccountNumber)).Count();
-                string savingId = request.AccountNumber + "SB" + (savingCount + 1).ToString();
+                
                 // Add a new saving
                 SavingInfo saving = new()
                 {
@@ -45,10 +43,13 @@ namespace OnlineBankingAPI.Controllers
                     StartDate = startDate,
                     EndDate = startDate.AddMonths(package.Duration),
                     PackageId = package.Id,
-                    SavingId = savingId
+                    SavingId = ""
                 };
                 _onlineBankingDB.SavingInfos.Add(saving);
-
+                _onlineBankingDB.SaveChanges();
+                string savingId = request.AccountNumber + "SB" + saving.Id.ToString();
+                saving.SavingId = savingId;
+                // Do transfer & add to Transaction
                 TransferCommand transferCommand = new()
                 {
                     Id = "MTBT00" + (_onlineBankingDB.TransferCommands.Count() + 1).ToString(),
@@ -61,8 +62,6 @@ namespace OnlineBankingAPI.Controllers
                     FromCurrentBalance = souceBalance
                 };
                 _onlineBankingDB.TransferCommands.Add(transferCommand);
-
-                // Do transfer & add to Transaction
                 Transaction createSavingTransaction = new()
                 {
                     ChangedAmount = -(request.Amount),
@@ -109,7 +108,7 @@ namespace OnlineBankingAPI.Controllers
             return NotFound(new { message = $"Not Found any savings from account {accountNumber} "});
         }
         [Route("saving-packages")]
- 
+        [Authorize]
         [HttpGet]
         public IActionResult GetSavingPackages()
         {

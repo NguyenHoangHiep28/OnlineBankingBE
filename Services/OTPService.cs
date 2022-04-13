@@ -61,12 +61,12 @@ namespace OnlineBankingAPI.Services
                 }
                 else
                 {
-                    return BadRequest("OTP isn't match! Please try again.");
+                    return BadRequest("OTP doesn't match! Please try again.");
                 }
             }
             else
             {
-                return BadRequest("OTP isn't match! Please try again.");
+                return BadRequest("OTP doesn't match! Please try again.");
             }
         }
         public string GenerateRandomOTP(string accountNumber)
