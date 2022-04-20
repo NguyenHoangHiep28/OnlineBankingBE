@@ -23,11 +23,11 @@ namespace OnlineBankingAPI.Services
         public void FinalizeSaving()
         {
             int hour = 0;
-            int minute = 5;
-            if (DateTime.Now.Hour == hour)
-            {
-                if (DateTime.Now.Minute - minute <= 0)
-                {
+            int minute = 0;
+            //if (DateTime.Now.Hour == hour)
+            //{
+            //    if (DateTime.Now.Minute - minute == 0)
+            //    {
                     List<SavingInfo> savingInfos = _onlineBankingDB.SavingInfos.ToList();
                     Account sourceAccount;
                     long interest, amount;
@@ -85,8 +85,8 @@ namespace OnlineBankingAPI.Services
                             }
                         }
                     }
-                }
-            }
+            //    }
+            //}
         }
 
         private SavingPackage GetPackage(int Id)

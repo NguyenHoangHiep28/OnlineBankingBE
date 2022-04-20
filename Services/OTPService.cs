@@ -31,7 +31,7 @@ namespace OnlineBankingAPI.Services
     {
         private OnlineBankingDBContext bankingContext;
         private string accountSid = "ACc619004490dbd4138e1b385e9b256972";
-        private string authToken = "c8188d22d65687e681c08672870d60d6";
+        private string authToken = "23c891294a5c6bcabe261cf33e2b5b41";
         // 3c736c9a89fc77017babb9a757db5a55
         public OTPService(OnlineBankingDBContext onlineBankingDB)
         {

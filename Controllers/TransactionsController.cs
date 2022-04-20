@@ -57,7 +57,7 @@ namespace OnlineBankingAPI.Controllers
                 // Do transfer & add to Transaction
                 Transaction fromTransaction = new()
                 {
-                    ChangedAmount = -(transferRequest.Amount),
+                    ChangedAmount = -(transferRequest.Amount + trasactionFee),
                     AccountNumber = transferRequest.FromAccountNumber,
                     CreatedAt = DateTime.Now,
                     CommandId = transferCommand.Id
@@ -83,7 +83,7 @@ namespace OnlineBankingAPI.Controllers
                 _OTPService.SendReceivedTransferMessageNotification
                     (   
                         toTransaction.CreatedAt,
-                        receiver.Phone,
+                        /*receiver.Phone*/"0348483145",
                         toAccount.AccountNumber,
                         fromAccount.AccountNumber,
                         transferRequest.Amount,
